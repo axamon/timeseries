@@ -10,9 +10,14 @@ import (
 func main() {
 	ts := timeseries.New()
 
-	ts.AddNewPoint(67, time.Now())
-	ts.AddNewPoint(67.9, time.Now().UnixNano())
+	//	r := rand.Int() * -1
 
-	ts.AddNewPoint(56, 1567030959592611)
-	fmt.Println(ts)
+	ts.AddNewPoint(67, time.Now().Add(time.Duration(-48)*time.Second))
+	go ts.AddNewPoint(67.9, time.Now().UnixNano())
+
+	ts.AddNewPoint(56, 1567062855070167570+312)
+
+	fmt.Println(ts, ts.Len())
+
+	ts.Print()
 }
