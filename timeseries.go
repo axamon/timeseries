@@ -1,3 +1,7 @@
+// Copyright 2019 Alberto Bregliano. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package timeseries
 
 import (
@@ -7,6 +11,12 @@ import (
 	"sync"
 	"time"
 )
+
+// Point rappresent a point present in a time serie.
+type Point struct {
+	X int64
+	Y float64
+}
 
 // Timeseries is the type for time series.
 type Timeseries struct {
@@ -18,16 +28,16 @@ type Timeseries struct {
 // New creates a timeserie
 func New() *Timeseries {
 
-	s := new(Timeseries)
-	s.XY = make(map[int64]float64, 0)
+	ts := new(Timeseries)
+	ts.XY = make(map[int64]float64, 0)
 
-	return s
+	return ts
 }
 
 // AddNewPoint adds a point to the time serie.
 func (ts *Timeseries) AddNewPoint(v float64, x interface{}) error {
 	ts.Lock()
-	defer ts.Unlock()
+	defer ts.Unlock() // unlocks at the end
 
 	switch T := x.(type) {
 	case int64:
@@ -43,6 +53,7 @@ func (ts *Timeseries) AddNewPoint(v float64, x interface{}) error {
 	return nil
 }
 
+// Len returns the length of the timeserie.
 func (ts *Timeseries) Len() int {
 
 	ts.Lock()
@@ -55,8 +66,15 @@ func (ts *Timeseries) Len() int {
 
 func (ts *Timeseries) orderIndex() {
 
-	// converts ts indexes to strings
+	// locks the time serie untill the end
+	ts.Lock()
+	defer ts.Unlock()
+
+	// creates string slices to contain indexes
 	var indexes []string
+
+	// cicles through the XY map and appends the indexes
+	// trasformed in string to the slice
 	for n := range ts.XY {
 		indexes = append(indexes, fmt.Sprint(n))
 	}
@@ -64,8 +82,7 @@ func (ts *Timeseries) orderIndex() {
 	// sorts in ascending order the indexes
 	sort.Strings(indexes)
 
-	ts.Lock()
-	defer ts.Unlock()
+	// clears the existing ts.orderedIndex
 	ts.orderedIndex = []int64{}
 
 	// loops through the ts.XY map and prints
@@ -75,12 +92,12 @@ func (ts *Timeseries) orderIndex() {
 		i, _ := strconv.ParseInt(s, 10, 64) // convers the string in int64
 
 		ts.orderedIndex = append(ts.orderedIndex, i)
-		// fmt.Println(i, ts.XY[int64(i)])
 	}
 
 	return
 }
 
+// Print prints all the points in the timeserie.
 func (ts *Timeseries) Print() {
 	ts.orderIndex()
 
@@ -91,10 +108,63 @@ func (ts *Timeseries) Print() {
 	return
 }
 
-func (ts *Timeseries) AddValueToIndex() {
-
+// AddValueToIndex adds the value v at the value present
+// at the index specified.
+func (ts *Timeseries) AddValueToIndex(v float64, i int64) {
+	ts.Lock()
+	ts.XY[i] = float64(ts.XY[i]) + v
+	ts.Unlock()
 }
 
-func (ts *Timeseries) AddValueToTime() {
+// AddValueToTime adds the value v at the value present
+// at the timestamp specified.
+func (ts *Timeseries) AddValueToTime(v float64, t time.Time) {
+	ts.Lock()
+	i := t.Unix()
+	ts.XY[i] = float64(ts.XY[i]) + v
+	ts.Unlock()
+}
 
+// FindNextPoint returns the next recorded index in the time serie.
+// If not available it will return a Point with 0,0
+func (ts *Timeseries) FindNextPoint(i int64) Point {
+
+	ts.orderIndex()
+
+	var p = new(Point)
+
+	for n, j := range ts.orderedIndex {
+		if j == i {
+			if n+1 < len(ts.orderedIndex) {
+				p.X = ts.orderedIndex[n+1]
+				p.Y = ts.XY[p.X]
+				return *p
+			}
+		}
+
+	}
+
+	return *p
+}
+
+// FindPreviousPoint returns the next recorded index in the time serie.
+// If not available it will return a Point with 0,0
+func (ts *Timeseries) FindPreviousPoint(i int64) Point {
+
+	ts.orderIndex()
+
+	var p = new(Point)
+
+	for n, j := range ts.orderedIndex {
+		if j == i {
+			if n-1 > 0 {
+				p.X = ts.orderedIndex[n-1]
+				p.Y = ts.XY[p.X]
+				return *p
+			}
+		}
+
+	}
+
+	return *p
 }
