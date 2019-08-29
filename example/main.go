@@ -2,13 +2,24 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/axamon/timeseries"
 )
 
 func main() {
+
 	ts := timeseries.New()
+
+	now := time.Now()
+
+	for i := 0; i <= 100; i++ {
+		now = now.Add(time.Minute*time.Duration(5))
+
+		ts.AddNewPoint(float64(rand.Intn(50)), now)
+		fmt.Println(i)
+	}
 
 	//	r := rand.Int() * -1
 

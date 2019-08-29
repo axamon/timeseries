@@ -102,7 +102,7 @@ func (ts *Timeseries) Print() {
 	ts.orderIndex()
 
 	for n, i := range ts.orderedIndex {
-		fmt.Println(n, i, "\t", ts.XY[i])
+		fmt.Println(n,  "\t",i, "\t", ts.XY[i])
 	}
 
 	return
