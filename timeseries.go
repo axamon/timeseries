@@ -102,7 +102,7 @@ func (ts *Timeseries) Print() {
 	ts.orderIndex()
 
 	for n, i := range ts.orderedIndex {
-		fmt.Println(n,  "\t",i, "\t", ts.XY[i])
+		fmt.Println(n, "\t", i, "\t", ts.XY[i])
 	}
 
 	return
@@ -167,4 +167,23 @@ func (ts *Timeseries) FindPreviousPoint(i int64) Point {
 	}
 
 	return *p
+}
+
+// ToSlice creates a slice with the values of the time serie.
+func (ts *Timeseries) ToSlice() []float64 {
+
+	var slice []float64
+
+	ts.orderIndex()
+
+	ts.Lock()
+	defer ts.Unlock()
+	for _, i := range ts.orderedIndex {
+
+		slice = append(slice, ts.XY[i])
+
+	}
+
+	return slice
+
 }

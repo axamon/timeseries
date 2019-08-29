@@ -15,8 +15,8 @@ func main() {
 	now := time.Now()
 
 	for i := 0; i <= 100; i++ {
-		now = now.Add(time.Minute*time.Duration(5))
-
+		now = now.Add(time.Minute * time.Duration(5))
+		fmt.Println(ts.ToSlice())
 		ts.AddNewPoint(float64(rand.Intn(50)), now)
 		fmt.Println(i)
 	}
