@@ -5,6 +5,7 @@
 package timeseries_test
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -58,6 +59,24 @@ func TestTimeseries_Len(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.ts.Len(); got != tt.want {
 				t.Errorf("Timeseries.Len() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTimeseries_ToSlice(t *testing.T) {
+	var ts = timeseries.New()
+
+	tests := []struct {
+		name string
+		want []float64
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := ts.ToSlice(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Timeseries.ToSlice() = %v, want %v", got, tt.want)
 			}
 		})
 	}

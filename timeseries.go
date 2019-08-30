@@ -6,6 +6,7 @@ package timeseries
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"strconv"
 	"sync"
@@ -89,7 +90,10 @@ func (ts *Timeseries) orderIndex() {
 	// in ascending order its content converting
 	// the ordered indexes back to int64
 	for _, s := range indexes {
-		i, _ := strconv.ParseInt(s, 10, 64) // convers the string in int64
+		i, err := strconv.ParseInt(s, 10, 64) // convers the string in int64
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		ts.orderedIndex = append(ts.orderedIndex, i)
 	}
