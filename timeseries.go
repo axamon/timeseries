@@ -112,6 +112,18 @@ func (ts *Timeseries) Print() {
 	return
 }
 
+// PrintFormattedTime prints all the points in the timeserie,
+// with times formatted as RFC339
+func (ts *Timeseries) PrintFormattedTime() {
+	ts.orderIndex()
+
+	for n, i := range ts.orderedIndex {
+		fmt.Println(n, "\t", time.Unix(i/1000000000, 0).Format(time.RFC3339), "\t", ts.XY[i])
+	}
+
+	return
+}
+
 // AddValueToIndex adds the value v at the value present
 // at the index specified.
 func (ts *Timeseries) AddValueToIndex(v float64, i int64) {
@@ -189,5 +201,19 @@ func (ts *Timeseries) ToSlice() []float64 {
 	}
 
 	return slice
+
+}
+
+// FromSlice returns a new timeserie created with the data in the slice passed
+// as argument.
+func FromSlice(start time.Time, step time.Duration, s []float64) (ts *Timeseries, err error) {
+
+	ts = New()
+
+	for n, v := range s {
+		err = ts.AddNewPoint(v, start.Add(step*time.Duration(n)))
+	}
+
+	return ts, err
 
 }
