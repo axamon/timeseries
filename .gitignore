@@ -1,1 +1,3 @@
 .coverall.yml
+example
+example/main.go

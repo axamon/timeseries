@@ -1,14 +1,12 @@
 // Copyright 2019 Alberto Bregliano. All rights reserved.
-
 // Use of this source code is governed by a BSD-style
-
 // license that can be found in the LICENSE file.
 
 package timeseries_test
 
 import (
-	"log"
 	"fmt"
+	"log"
 	"math/rand"
 	"reflect"
 	"testing"
@@ -136,12 +134,11 @@ func ExampleTimeseries_Print() {
 	// 1 	 11 	 0.50002
 }
 
-
 func ExampleTimeseries_ToSlice() {
 	rand.Seed(1234567)
 	ts := timeseries.New()
 	beginning, err := time.Parse(time.RFC3339, "2019-09-02T10:15:00Z")
-	if err !=nil {
+	if err != nil {
 		log.Fatal(err)
 	}
 
@@ -174,7 +171,45 @@ func ExampleFromSlice() {
 	// 5 	 1567509300000000000 	 3.4
 }
 
+func ExampleTimeseries_FirstX() {
+	rand.Seed(1234567)
+	ts := timeseries.New()
+	beginning, err := time.Parse(time.RFC3339, "2019-09-02T10:15:00Z")
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	for i := 0; i < 10; i++ {
+
+		ts.AddNewPoint(float64(rand.Int63n(50)), beginning.Add(time.Duration(i*3)*time.Minute))
+	}
+
+	fmt.Println(ts.FirstX())
+	fmt.Println(time.Unix(ts.FirstX()/1000000000, 0).UTC().Format(time.RFC3339))
+	// Output:
+	// 1567419300000000000
+	// 2019-09-02T10:15:00Z
+}
+
+func ExampleTimeseries_LastX() {
+	rand.Seed(1234567)
+	ts := timeseries.New()
+	beginning, err := time.Parse(time.RFC3339, "2019-09-02T10:15:00Z")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for i := 0; i < 10; i++ {
+
+		ts.AddNewPoint(float64(rand.Int63n(50)), beginning.Add(time.Duration(i*3)*time.Minute))
+	}
+
+	fmt.Println(ts.LastX())
+	fmt.Println(time.Unix(ts.LastX()/1000000000, 0).UTC().Format(time.RFC3339))
+	// Output:
+	// 1567420920000000000
+	// 2019-09-02T10:42:00Z
+}
 
 func BenchmarkAddNewPoint(b *testing.B) {
 	ts := timeseries.New()
