@@ -23,6 +23,8 @@ type Point struct {
 type Timeseries struct {
 	XY           map[int64]float64
 	orderedIndex []int64
+	firstX       int64
+	lastX        int64
 	sync.Mutex
 }
 
@@ -69,7 +71,6 @@ func (ts *Timeseries) orderIndex() {
 
 	// locks the time serie untill the end
 	ts.Lock()
-	defer ts.Unlock()
 
 	// creates string slices to contain indexes
 	var indexes []string
@@ -89,16 +90,41 @@ func (ts *Timeseries) orderIndex() {
 	// loops through the ts.XY map and prints
 	// in ascending order its content converting
 	// the ordered indexes back to int64
-	for _, s := range indexes {
+	for n, s := range indexes {
 		i, err := strconv.ParseInt(s, 10, 64) // convers the string in int64
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		ts.orderedIndex = append(ts.orderedIndex, i)
+		if n == 0 {
+			ts.firstX = i
+		}
+		if n == len(indexes)-1 {
+			ts.lastX = i
+		}
 	}
+	ts.Unlock()
 
 	return
+}
+
+// FirstX returns the beginning timestamp of the serie.
+func (ts *Timeseries) FirstX() int64 {
+
+	ts.orderIndex()
+
+	return ts.firstX
+
+}
+
+// LastX returns the ending timestamp of the serie.
+func (ts *Timeseries) LastX() int64 {
+
+	ts.orderIndex()
+
+	return ts.lastX
+
 }
 
 // Print prints all the points in the timeserie.

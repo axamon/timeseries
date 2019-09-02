@@ -64,4 +64,6 @@ func main() {
 
 	serie.Print()
 	serie.PrintFormattedTime()
+
+	fmt.Println(serie.FirstX(), serie.LastX())
 }
