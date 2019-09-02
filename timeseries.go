@@ -23,6 +23,8 @@ type Point struct {
 type Timeseries struct {
 	XY           map[int64]float64
 	orderedIndex []int64
+	firstX       int64
+	lastX        int64
 	sync.Mutex
 }
 
@@ -69,7 +71,6 @@ func (ts *Timeseries) orderIndex() {
 
 	// locks the time serie untill the end
 	ts.Lock()
-	defer ts.Unlock()
 
 	// creates string slices to contain indexes
 	var indexes []string
@@ -89,16 +90,41 @@ func (ts *Timeseries) orderIndex() {
 	// loops through the ts.XY map and prints
 	// in ascending order its content converting
 	// the ordered indexes back to int64
-	for _, s := range indexes {
+	for n, s := range indexes {
 		i, err := strconv.ParseInt(s, 10, 64) // convers the string in int64
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		ts.orderedIndex = append(ts.orderedIndex, i)
+		if n == 0 {
+			ts.firstX = i
+		}
+		if n == len(indexes)-1 {
+			ts.lastX = i
+		}
 	}
+	ts.Unlock()
 
 	return
+}
+
+// FirstX returns the beginning timestamp of the serie.
+func (ts *Timeseries) FirstX() int64 {
+
+	ts.orderIndex()
+
+	return ts.firstX
+
+}
+
+// LastX returns the ending timestamp of the serie.
+func (ts *Timeseries) LastX() int64 {
+
+	ts.orderIndex()
+
+	return ts.lastX
+
 }
 
 // Print prints all the points in the timeserie.
@@ -107,6 +133,18 @@ func (ts *Timeseries) Print() {
 
 	for n, i := range ts.orderedIndex {
 		fmt.Println(n, "\t", i, "\t", ts.XY[i])
+	}
+
+	return
+}
+
+// PrintFormattedTime prints all the points in the timeserie,
+// with times formatted as RFC339
+func (ts *Timeseries) PrintFormattedTime() {
+	ts.orderIndex()
+
+	for n, i := range ts.orderedIndex {
+		fmt.Println(n, "\t", time.Unix(i/1000000000, 0).Format(time.RFC3339), "\t", ts.XY[i])
 	}
 
 	return
@@ -189,5 +227,19 @@ func (ts *Timeseries) ToSlice() []float64 {
 	}
 
 	return slice
+
+}
+
+// FromSlice returns a new timeserie created with the data in the slice passed
+// as argument.
+func FromSlice(start time.Time, step time.Duration, s []float64) (ts *Timeseries, err error) {
+
+	ts = New()
+
+	for n, v := range s {
+		err = ts.AddNewPoint(v, start.Add(step*time.Duration(n)))
+	}
+
+	return ts, err
 
 }
