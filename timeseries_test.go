@@ -119,6 +119,19 @@ func TestTimeseries_ToSlice(t *testing.T) {
 	}
 }
 
+func ExampleTimeseries_Print() {
+
+	ts := timeseries.New()
+
+	ts.AddNewPoint(0.43, int64(10))
+	ts.AddNewPoint(0.50002, int64(11))
+
+	ts.Print()
+	// Output:
+	// 0 	 10 	 0.43
+	// 1 	 11 	 0.50002
+}
+
 func BenchmarkAddNewPoint(b *testing.B) {
 	ts := timeseries.New()
 	// run the Fib function b.N times
