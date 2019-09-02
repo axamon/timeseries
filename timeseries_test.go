@@ -1,10 +1,14 @@
 // Copyright 2019 Alberto Bregliano. All rights reserved.
+
 // Use of this source code is governed by a BSD-style
+
 // license that can be found in the LICENSE file.
 
 package timeseries_test
 
 import (
+	"log"
+	"fmt"
 	"math/rand"
 	"reflect"
 	"testing"
@@ -131,6 +135,46 @@ func ExampleTimeseries_Print() {
 	// 0 	 10 	 0.43
 	// 1 	 11 	 0.50002
 }
+
+
+func ExampleTimeseries_ToSlice() {
+	rand.Seed(1234567)
+	ts := timeseries.New()
+	beginning, err := time.Parse(time.RFC3339, "2019-09-02T10:15:00Z")
+	if err !=nil {
+		log.Fatal(err)
+	}
+
+	for i := 0; i < 10; i++ {
+
+		ts.AddNewPoint(float64(rand.Int63n(50)), beginning.Add(time.Duration(i*3)*time.Minute))
+	}
+
+	s := ts.ToSlice()
+
+	fmt.Println(s)
+	// Output:
+	// [26 29 37 41 42 11 36 30 20 18]
+}
+
+func ExampleFromSlice() {
+
+	s := []float64{0, 2.1, 3.2, 5.4, 6.001, 3.4}
+	beginning, _ := time.Parse(time.RFC3339, "2019-09-02T10:15:00Z")
+
+	ts, _ := timeseries.FromSlice(beginning, time.Duration(5*time.Hour), s)
+
+	ts.Print()
+	// Output:
+	// 0 	 1567419300000000000 	 0
+	// 1 	 1567437300000000000 	 2.1
+	// 2 	 1567455300000000000 	 3.2
+	// 3 	 1567473300000000000 	 5.4
+	// 4 	 1567491300000000000 	 6.001
+	// 5 	 1567509300000000000 	 3.4
+}
+
+
 
 func BenchmarkAddNewPoint(b *testing.B) {
 	ts := timeseries.New()
