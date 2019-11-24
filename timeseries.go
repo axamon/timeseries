@@ -230,6 +230,25 @@ func (ts *Timeseries) ToSlice() []float64 {
 
 }
 
+// XtoSlice creates a slice with the X values of the time serie.
+func (ts *Timeseries) XtoSlice() []float64 {
+
+	var slice []float64
+
+	ts.orderIndex()
+
+	ts.Lock()
+	defer ts.Unlock()
+	for _, i := range ts.orderedIndex {
+
+		slice = append(slice, float64(i))
+
+	}
+
+	return slice
+
+}
+
 // FromSlice returns a new timeserie created with the data in the slice passed
 // as argument.
 func FromSlice(start time.Time, step time.Duration, s []float64) (ts *Timeseries, err error) {
