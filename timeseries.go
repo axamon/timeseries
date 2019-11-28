@@ -271,8 +271,8 @@ func (ts *Timeseries) ToSlice() []float64 {
 
 }
 
-// XtoSlice creates a slice []float64 with the timetamps of the timeserie. 
-func (ts *Timeseries) XtoSlice() []float64 {
+// XtoSliceFloat64 creates a slice []float64 with the timetamps of the timeserie. 
+func (ts *Timeseries) XtoSliceFloat64() []float64 {
 
 	var slice []float64
 
@@ -283,6 +283,26 @@ func (ts *Timeseries) XtoSlice() []float64 {
 	for _, i := range ts.orderedIndex {
 
 		slice = append(slice, float64(i))
+
+	}
+
+	return slice
+
+}
+
+
+// XtoSliceInt64 creates a slice []int64 with the timetamps of the timeserie. 
+func (ts *Timeseries) XtoSliceInt64() []int64 {
+
+	var slice []int64
+
+	ts.orderIndex()
+
+	ts.Lock()
+	defer ts.Unlock()
+	for _, i := range ts.orderedIndex {
+
+		slice = append(slice, i)
 
 	}
 
