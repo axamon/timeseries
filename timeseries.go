@@ -184,18 +184,15 @@ func (ts *Timeseries) AddValueToIndex(v float64, i int64) {
 	//ts.Lock()
 	//defer ts.Unlock()
 
-	oldvalue, exists := ts.XY[i]
-
-	switch {
-	case exists == true:
+	if oldvalue, exists := ts.XY[i]; exists {
 		ts.Lock()
 			ts.XY[i] = oldvalue + v
 		ts.Unlock()
-	case exists == false:
+		return
+	}
 		ts.Lock()
 			ts.XY[i] = v
 		ts.Unlock()
-	}
 	
 	return
 }
