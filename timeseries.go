@@ -26,7 +26,7 @@ type Timeseries struct {
 	firstX       int64
 	lastX        int64
 	firstY       float64
-	lastY		 float64
+	lastY        float64
 	sync.Mutex
 }
 
@@ -124,12 +124,32 @@ func (ts *Timeseries) FirstX() int64 {
 
 }
 
+
+// FirstY returns the beginning value of the serie.
+func (ts *Timeseries) FirstY() int64 {
+
+	ts.orderIndex()
+
+	return ts.firstY
+
+}
+
+
 // LastX returns the ending timestamp of the serie.
 func (ts *Timeseries) LastX() int64 {
 
 	ts.orderIndex()
 
 	return ts.lastX
+
+}
+
+// LastY returns the ending value of the serie.
+func (ts *Timeseries) LastY() float64 {
+
+	ts.orderIndex()
+
+	return ts.lastY
 
 }
 
@@ -143,6 +163,8 @@ func (ts *Timeseries) Print() {
 
 	return
 }
+
+
 
 // PrintFormattedTime prints all the points in the timeserie,
 // with times formatted as RFC339
