@@ -126,7 +126,7 @@ func (ts *Timeseries) FirstX() int64 {
 
 
 // FirstY returns the beginning value of the serie.
-func (ts *Timeseries) FirstY() int64 {
+func (ts *Timeseries) FirstY() float64 {
 
 	ts.orderIndex()
 
