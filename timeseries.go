@@ -25,6 +25,8 @@ type Timeseries struct {
 	orderedIndex []int64
 	firstX       int64
 	lastX        int64
+	firstY       float64
+	lastY		 float64
 	sync.Mutex
 }
 
@@ -96,12 +98,16 @@ func (ts *Timeseries) orderIndex() {
 			log.Fatal(err)
 		}
 
+		
+
 		ts.orderedIndex = append(ts.orderedIndex, i)
 		if n == 0 {
 			ts.firstX = i
+			ts.firstY = ts.XY[i]
 		}
 		if n == len(indexes)-1 {
 			ts.lastX = i
+			ts.lastY = ts.XY[i]
 		}
 	}
 	ts.Unlock()
