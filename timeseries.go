@@ -181,16 +181,20 @@ func (ts *Timeseries) PrintFormattedTime() {
 // AddValueToIndex adds the value v at the value present
 // at the index specified.
 func (ts *Timeseries) AddValueToIndex(v float64, i int64) {
-	ts.Lock()
-	defer ts.Unlock()
+	//ts.Lock()
+	//defer ts.Unlock()
 
 	oldvalue, exists := ts.XY[i]
 
 	switch {
 	case exists == true:
-		ts.XY[i] = oldvalue + v
+		ts.Lock()
+			ts.XY[i] = oldvalue + v
+		ts.Unlock()
 	case exists == false:
-		ts.XY[i] = v
+		ts.Lock()
+			ts.XY[i] = v
+		ts.Unlock()
 	}
 	
 	return
