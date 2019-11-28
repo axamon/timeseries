@@ -195,7 +195,8 @@ func (ts *Timeseries) AddValueToTime(v float64, t time.Time) {
 	ts.Unlock()
 }
 
-// FindNextPoint returns the next recorded index in the time serie.
+// FindNextPoint returns the next point in the timeserie
+// based on the intt64 index passed as argument.
 // If not available it will return a Point with 0,0
 func (ts *Timeseries) FindNextPoint(i int64) Point {
 
@@ -205,7 +206,7 @@ func (ts *Timeseries) FindNextPoint(i int64) Point {
 
 	for n, j := range ts.orderedIndex {
 		if j == i {
-			if n+1 < len(ts.orderedIndex) {
+			if n+1 < len(ts.orderedIndex) { // to void panic
 				p.X = ts.orderedIndex[n+1]
 				p.Y = ts.XY[p.X]
 				return *p
@@ -217,7 +218,8 @@ func (ts *Timeseries) FindNextPoint(i int64) Point {
 	return *p
 }
 
-// FindPreviousPoint returns the next recorded index in the time serie.
+// FindPreviousPoint returns the previous point in the timeserie
+// based on the intt64 index passed as argument.
 // If not available it will return a Point with 0,0
 func (ts *Timeseries) FindPreviousPoint(i int64) Point {
 
@@ -227,7 +229,7 @@ func (ts *Timeseries) FindPreviousPoint(i int64) Point {
 
 	for n, j := range ts.orderedIndex {
 		if j == i {
-			if n-1 > 0 {
+			if n-1 > 0 { // to void panic
 				p.X = ts.orderedIndex[n-1]
 				p.Y = ts.XY[p.X]
 				return *p
@@ -258,7 +260,7 @@ func (ts *Timeseries) ToSlice() []float64 {
 
 }
 
-// XtoSlice creates a slice with the X values of the time serie.
+// XtoSlice creates a slice []float64 with the timetamps of the timeserie. 
 func (ts *Timeseries) XtoSlice() []float64 {
 
 	var slice []float64
