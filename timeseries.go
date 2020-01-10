@@ -301,9 +301,8 @@ func FromSlice(start time.Time, step time.Duration, s []float64) (ts *Timeseries
 
 // AddNewPointKeepLen adds a point to the time serie and keep a certain number of points.
 func (ts *Timeseries) AddNewPointKeepLen(v float64, x interface{}) error {
-
-	l := ts.Len()
-	ts.Lock()
+	ts.orderIndex()
+	l := len(ts.XY)
 	switch T := x.(type) {
 	case int64:
 		ts.XY[T] = v
@@ -314,15 +313,17 @@ func (ts *Timeseries) AddNewPointKeepLen(v float64, x interface{}) error {
 	default:
 		return fmt.Errorf("Adding point not possible")
 	}
-	ts.Unlock()
-	if ts.Len() > l {
-		ts.orderIndex()
-		ts.Lock()
-		oldestindex := ts.firstX
-		delete(ts.XY, oldestindex)
-		ts.Unlock()
-		ts.orderIndex()
+	newl := len(ts.XY)
+
+	keys := make([]float64, 0, len(ts.XY))
+	for k := range ts.XY {
+        keys = append(keys, float64(k))
 	}
+	sort.Float64s(keys)
+	if newl > l {
+		delete(ts.XY, int64(keys[0]))
+	}
+	ts.orderIndex()
 
 	return nil
 }

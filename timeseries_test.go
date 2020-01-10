@@ -223,14 +223,19 @@ func ExampleTimeseries_AddNewPointKeepLen() {
 
 	ts := timeseries.New()
 
-	ts.AddNewPoint(0.43, int64(10))
+	ts.AddNewPoint(0.48, int64(8))
+	ts.AddNewPoint(0.49, int64(9))
+	ts.AddNewPoint(0.410, int64(10))
 	ts.AddNewPoint(0.50002, int64(11))
 	ts.AddNewPointKeepLen(0.8, int64(12))
-	ts.AddNewPointKeepLen(0.9, int(13))
-	ts.AddNewPointKeepLen(1.1, int(13))
-
+	ts.AddNewPointKeepLen(0.9, int64(13))
+	ts.AddNewPointKeepLen(1.1, int64(13))
+	// fmt.Printf("%v",ts)
+	
 	ts.Print()
 	// Output:
-	// 0 	 12 	 0.8
-	// 1 	 13 	 1.1
+	// 0 	 10 	 0.41
+	// 1 	 11 	 0.50002
+	// 2 	 12 	 0.8
+	// 3 	 13 	 1.1
 }
