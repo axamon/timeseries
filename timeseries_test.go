@@ -218,3 +218,19 @@ func BenchmarkAddNewPoint(b *testing.B) {
 		ts.AddNewPoint(float64(rand.Intn(1000)), time.Now().Add(time.Duration(n)*time.Hour))
 	}
 }
+
+func ExampleTimeseries_AddNewPointKeepLen() {
+
+	ts := timeseries.New()
+
+	ts.AddNewPoint(0.43, int64(10))
+	ts.AddNewPoint(0.50002, int64(11))
+	ts.AddNewPointKeepLen(0.8, int64(12))
+	ts.AddNewPointKeepLen(0.9, int(13))
+	ts.AddNewPointKeepLen(1.1, int(13))
+
+	ts.Print()
+	// Output:
+	// 0 	 12 	 0.8
+	// 1 	 13 	 1.1
+}

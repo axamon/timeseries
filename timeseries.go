@@ -9,26 +9,8 @@ import (
 	"log"
 	"sort"
 	"strconv"
-	"sync"
 	"time"
 )
-
-// Point rappresent a point present in a time serie.
-type Point struct {
-	X int64
-	Y float64
-}
-
-// Timeseries is the type for time series.
-type Timeseries struct {
-	XY           map[int64]float64
-	orderedIndex []int64
-	firstX       int64
-	lastX        int64
-	firstY       float64
-	lastY        float64
-	sync.Mutex
-}
 
 // New creates a timeserie
 func New() *Timeseries {
@@ -98,8 +80,6 @@ func (ts *Timeseries) orderIndex() {
 			log.Fatal(err)
 		}
 
-		
-
 		ts.orderedIndex = append(ts.orderedIndex, i)
 		if n == 0 {
 			ts.firstX = i
@@ -124,7 +104,6 @@ func (ts *Timeseries) FirstX() int64 {
 
 }
 
-
 // FirstY returns the beginning value of the serie.
 func (ts *Timeseries) FirstY() float64 {
 
@@ -133,7 +112,6 @@ func (ts *Timeseries) FirstY() float64 {
 	return ts.firstY
 
 }
-
 
 // LastX returns the ending timestamp of the serie.
 func (ts *Timeseries) LastX() int64 {
@@ -164,8 +142,6 @@ func (ts *Timeseries) Print() {
 	return
 }
 
-
-
 // PrintFormattedTime prints all the points in the timeserie,
 // with times formatted as RFC339
 func (ts *Timeseries) PrintFormattedTime() {
@@ -186,14 +162,14 @@ func (ts *Timeseries) AddValueToIndex(v float64, i int64) {
 
 	if oldvalue, exists := ts.XY[i]; exists {
 		ts.Lock()
-			ts.XY[i] = oldvalue + v
+		ts.XY[i] = oldvalue + v
 		ts.Unlock()
 		return
 	}
-		ts.Lock()
-			ts.XY[i] = v
-		ts.Unlock()
-	
+	ts.Lock()
+	ts.XY[i] = v
+	ts.Unlock()
+
 	return
 }
 
@@ -271,7 +247,7 @@ func (ts *Timeseries) ToSlice() []float64 {
 
 }
 
-// XtoSliceFloat64 creates a slice []float64 with the timetamps of the timeserie. 
+// XtoSliceFloat64 creates a slice []float64 with the timetamps of the timeserie.
 func (ts *Timeseries) XtoSliceFloat64() []float64 {
 
 	var slice []float64
@@ -290,8 +266,7 @@ func (ts *Timeseries) XtoSliceFloat64() []float64 {
 
 }
 
-
-// XtoSliceInt64 creates a slice []int64 with the timetamps of the timeserie. 
+// XtoSliceInt64 creates a slice []int64 with the timetamps of the timeserie.
 func (ts *Timeseries) XtoSliceInt64() []int64 {
 
 	var slice []int64
@@ -322,4 +297,32 @@ func FromSlice(start time.Time, step time.Duration, s []float64) (ts *Timeseries
 
 	return ts, err
 
+}
+
+// AddNewPointKeepLen adds a point to the time serie and keep a certain number of points.
+func (ts *Timeseries) AddNewPointKeepLen(v float64, x interface{}) error {
+
+	l := ts.Len()
+	ts.Lock()
+	switch T := x.(type) {
+	case int64:
+		ts.XY[T] = v
+	case time.Time:
+		ts.XY[T.UnixNano()] = v
+	case int:
+		ts.XY[int64(T)] = v
+	default:
+		return fmt.Errorf("Adding point not possible")
+	}
+	ts.Unlock()
+	if ts.Len() > l {
+		ts.orderIndex()
+		ts.Lock()
+		oldestindex := ts.firstX
+		delete(ts.XY, oldestindex)
+		ts.Unlock()
+		ts.orderIndex()
+	}
+
+	return nil
 }
