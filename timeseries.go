@@ -146,7 +146,7 @@ func (ts *Timeseries) FindNextPoint(i int64) Point {
 
 	for n, j := range ts.orderedIndex {
 		if j == i {
-			if n+1 < len(ts.orderedIndex) { // to void panic
+			if n+1 < len(ts.orderedIndex) { // to avoid panic
 				p.X = ts.orderedIndex[n+1]
 				p.Y = ts.XY[p.X]
 				return *p
@@ -280,6 +280,39 @@ func (ts *Timeseries) GetPoint(x int64) Point {
 	var p Point
 	p.X = x
 	p.Y = ts.XY[x]
+
+	return p
+}
+
+// GetPreviousPoint retrievs the previous point.
+func (ts *Timeseries) GetPreviousPoint(x int64) Point {
+
+	ts.Lock()
+	defer ts.Unlock()
+
+	keys := make([]float64, 0, len(ts.XY))
+	for k := range ts.XY {
+		keys = append(keys, float64(k))
+	}
+	sort.Float64s(keys)
+
+	var index []int64
+
+	for _, k := range keys {
+		index = append(index, int64(k))
+	}
+
+	var previousx int64
+	for n, i := range index {
+		if i == x {
+			previousx = index[n-1]
+			break
+		}
+	}
+
+	var p Point
+	p.X = previousx
+	p.Y = ts.XY[previousx]
 
 	return p
 }

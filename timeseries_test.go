@@ -287,3 +287,22 @@ func ExampleTimeseries_GetPoint() {
 	// Output:
 	// 9 0.49
 }
+
+func ExampleTimeseries_GetPreviousPoint() {
+	ts := timeseries.New()
+
+	ts.AddNewPoint(0.48, int64(12))
+	ts.AddNewPoint(0.49, int64(13))
+	ts.AddNewPoint(0.410, int64(15))
+	ts.AddNewPoint(0.50002, int64(14))
+	ts.AddNewPoint(0.48, int64(8))
+	ts.AddNewPoint(0.49, int64(9))
+	ts.AddNewPoint(0.410, int64(10))
+	ts.AddNewPoint(0.50002, int64(11))
+
+	p := ts.GetPreviousPoint(9)
+
+	fmt.Println(p.X, p.Y)
+	// Output:
+	// 8 0.48
+}
