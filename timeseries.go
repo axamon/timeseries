@@ -9,26 +9,8 @@ import (
 	"log"
 	"sort"
 	"strconv"
-	"sync"
 	"time"
 )
-
-// Point rappresent a point present in a time serie.
-type Point struct {
-	X int64
-	Y float64
-}
-
-// Timeseries is the type for time series.
-type Timeseries struct {
-	XY           map[int64]float64
-	orderedIndex []int64
-	firstX       int64
-	lastX        int64
-	firstY       float64
-	lastY        float64
-	sync.Mutex
-}
 
 // New creates a timeserie
 func New() *Timeseries {
@@ -37,25 +19,6 @@ func New() *Timeseries {
 	ts.XY = make(map[int64]float64, 0)
 
 	return ts
-}
-
-// AddNewPoint adds a point to the time serie.
-func (ts *Timeseries) AddNewPoint(v float64, x interface{}) error {
-	ts.Lock()
-	defer ts.Unlock() // unlocks at the end
-
-	switch T := x.(type) {
-	case int64:
-		ts.XY[T] = v
-	case time.Time:
-		ts.XY[T.UnixNano()] = v
-	case int:
-		ts.XY[int64(T)] = v
-	default:
-		return fmt.Errorf("Adding point not possible")
-	}
-
-	return nil
 }
 
 // Len returns the length of the timeserie.
@@ -98,8 +61,6 @@ func (ts *Timeseries) orderIndex() {
 			log.Fatal(err)
 		}
 
-		
-
 		ts.orderedIndex = append(ts.orderedIndex, i)
 		if n == 0 {
 			ts.firstX = i
@@ -124,7 +85,6 @@ func (ts *Timeseries) FirstX() int64 {
 
 }
 
-
 // FirstY returns the beginning value of the serie.
 func (ts *Timeseries) FirstY() float64 {
 
@@ -133,7 +93,6 @@ func (ts *Timeseries) FirstY() float64 {
 	return ts.firstY
 
 }
-
 
 // LastX returns the ending timestamp of the serie.
 func (ts *Timeseries) LastX() int64 {
@@ -164,8 +123,6 @@ func (ts *Timeseries) Print() {
 	return
 }
 
-
-
 // PrintFormattedTime prints all the points in the timeserie,
 // with times formatted as RFC339
 func (ts *Timeseries) PrintFormattedTime() {
@@ -176,34 +133,6 @@ func (ts *Timeseries) PrintFormattedTime() {
 	}
 
 	return
-}
-
-// AddValueToIndex adds the value v at the value present
-// at the index specified.
-func (ts *Timeseries) AddValueToIndex(v float64, i int64) {
-	//ts.Lock()
-	//defer ts.Unlock()
-
-	if oldvalue, exists := ts.XY[i]; exists {
-		ts.Lock()
-			ts.XY[i] = oldvalue + v
-		ts.Unlock()
-		return
-	}
-		ts.Lock()
-			ts.XY[i] = v
-		ts.Unlock()
-	
-	return
-}
-
-// AddValueToTime adds the value v at the value present
-// at the timestamp specified.
-func (ts *Timeseries) AddValueToTime(v float64, t time.Time) {
-	ts.Lock()
-	i := t.Unix()
-	ts.XY[i] = float64(ts.XY[i]) + v
-	ts.Unlock()
 }
 
 // FindNextPoint returns the next point in the timeserie
@@ -271,7 +200,7 @@ func (ts *Timeseries) ToSlice() []float64 {
 
 }
 
-// XtoSliceFloat64 creates a slice []float64 with the timetamps of the timeserie. 
+// XtoSliceFloat64 creates a slice []float64 with the timetamps of the timeserie.
 func (ts *Timeseries) XtoSliceFloat64() []float64 {
 
 	var slice []float64
@@ -290,8 +219,7 @@ func (ts *Timeseries) XtoSliceFloat64() []float64 {
 
 }
 
-
-// XtoSliceInt64 creates a slice []int64 with the timetamps of the timeserie. 
+// XtoSliceInt64 creates a slice []int64 with the timetamps of the timeserie.
 func (ts *Timeseries) XtoSliceInt64() []int64 {
 
 	var slice []int64
@@ -322,4 +250,36 @@ func FromSlice(start time.Time, step time.Duration, s []float64) (ts *Timeseries
 
 	return ts, err
 
+}
+
+// GetOrderedIndex returns the orderd slice of X from map XY.
+func (ts *Timeseries) GetOrderedIndex() []int64 {
+	ts.Lock()
+	defer ts.Unlock()
+
+	keys := make([]float64, 0, len(ts.XY))
+	for k := range ts.XY {
+		keys = append(keys, float64(k))
+	}
+	sort.Float64s(keys)
+
+	var index []int64
+
+	for _, k := range keys {
+		index = append(index, int64(k))
+	}
+
+	return index
+}
+
+// GetPoint retrievs a point of the timeserie.
+func (ts *Timeseries) GetPoint(x int64) Point {
+	ts.Lock()
+	defer ts.Unlock()
+
+	var p Point
+	p.X = x
+	p.Y = ts.XY[x]
+
+	return p
 }

@@ -218,3 +218,72 @@ func BenchmarkAddNewPoint(b *testing.B) {
 		ts.AddNewPoint(float64(rand.Intn(1000)), time.Now().Add(time.Duration(n)*time.Hour))
 	}
 }
+
+func ExampleTimeseries_AddNewPointKeepLen() {
+
+	ts := timeseries.New()
+
+	ts.AddNewPoint(0.48, int64(8))
+	ts.AddNewPoint(0.49, int64(9))
+	ts.AddNewPoint(0.410, int64(10))
+	ts.AddNewPoint(0.50002, int64(11))
+	ts.AddNewPointKeepLen(0.8, int64(12))
+	ts.AddNewPointKeepLen(0.9, int64(13))
+	ts.AddNewPointKeepLen(1.1, int64(13))
+	// fmt.Printf("%v",ts)
+
+	ts.Print()
+	// Output:
+	// 0 	 10 	 0.41
+	// 1 	 11 	 0.50002
+	// 2 	 12 	 0.8
+	// 3 	 13 	 1.1
+}
+
+func ExampleTimeseries_GetOrderedIndex() {
+
+	ts := timeseries.New()
+
+	ts.AddNewPoint(0.48, int64(12))
+	ts.AddNewPoint(0.49, int64(13))
+	ts.AddNewPoint(0.410, int64(15))
+	ts.AddNewPoint(0.50002, int64(14))
+	ts.AddNewPoint(0.48, int64(8))
+	ts.AddNewPoint(0.49, int64(9))
+	ts.AddNewPoint(0.410, int64(10))
+	ts.AddNewPoint(0.50002, int64(11))
+
+	index := ts.GetOrderedIndex()
+
+	for _, i := range index {
+		fmt.Println(i)
+	}
+	// Output:
+	// 8
+	// 9
+	// 10
+	// 11
+	// 12
+	// 13
+	// 14
+	// 15
+}
+
+func ExampleTimeseries_GetPoint() {
+	ts := timeseries.New()
+
+	ts.AddNewPoint(0.48, int64(12))
+	ts.AddNewPoint(0.49, int64(13))
+	ts.AddNewPoint(0.410, int64(15))
+	ts.AddNewPoint(0.50002, int64(14))
+	ts.AddNewPoint(0.48, int64(8))
+	ts.AddNewPoint(0.49, int64(9))
+	ts.AddNewPoint(0.410, int64(10))
+	ts.AddNewPoint(0.50002, int64(11))
+
+	p := ts.GetPoint(9)
+
+	fmt.Println(p.X, p.Y)
+	// Output:
+	// 9 0.49
+}
