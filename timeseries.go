@@ -316,3 +316,27 @@ func (ts *Timeseries) GetPreviousPoint(x int64) Point {
 
 	return p
 }
+
+
+// GetHour ...
+func GetHour(timestamp int64) int {
+	// ! TODO: risolvere per int64 corti senza zeri finali
+	return time.Unix((timestamp/1000), 0).Hour()
+}
+
+
+// GetHourlyValues retrieves a slice with the values recorded in the specified hour.
+func (ts *Timeseries) GetHourlyValues(h int) []float64 {
+
+	// ricerca in ts tutti i valori per l'ora di interesse esistenti
+	indexes := ts.GetOrderedIndex()
+	var valoriOrari []float64
+	for _, i := range indexes {
+		hh := GetHour(i)
+		if hh == h {
+			valoriOrari = append(valoriOrari, ts.XY[i])
+		}
+	}
+
+	return valoriOrari
+}

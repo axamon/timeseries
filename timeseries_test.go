@@ -306,3 +306,29 @@ func ExampleTimeseries_GetPreviousPoint() {
 	// Output:
 	// 8 0.48
 }
+
+
+func ExampleGgetHour() {
+
+	timestamp := int64(1579192804000)
+	h := timeseries.GetHour(timestamp)
+	fmt.Println(h)
+	// Output:
+	// 17
+}
+
+func ExampleGetHourlyValues() {
+	ts := timeseries.New()
+
+	ts.AddNewPoint(2, int64(1579192804000))
+	ts.AddNewPoint(2, int64(1579192805000))
+	ts.AddNewPoint(5, int64(1579199805000))
+	ts.AddNewPoint(8, int64(1579192807000))
+
+	h17 := ts.GetHourlyValues(17)
+	h19 := ts.GetHourlyValues(19)
+
+	fmt.Println(h17, h19)
+	// Output:
+	// [2 2 8] [5]
+}
